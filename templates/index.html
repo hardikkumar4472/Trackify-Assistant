@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -644,5 +644,166 @@
         });
     };
     </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adamya AI</title>
+  <link rel="shortcut icon" href="/static/images/minecraft_icon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    :root {
+      --grass: #5e7c16;
+      --dirt: #835c3b;
+      --sky: #7ec0ee;
+      --text-color: #ffffff;
+      --block-border: #2e2e2e;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Press Start 2P', cursive;
+      background: url('/static/images/minecraft_bg.jpg') no-repeat center center/cover;
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .chat-container {
+      width: 90%;
+      max-width: 960px;
+      height: 90vh;
+      background-color: rgba(0, 0, 0, 0.8);
+      border: 8px solid var(--block-border);
+      box-shadow: 0 0 20px #222;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border-radius: 0;
+    }
+
+    .header-text {
+      background: var(--grass);
+      padding: 10px;
+      text-align: center;
+      color: #fff;
+      font-size: 1.2rem;
+      text-shadow: 2px 2px #000;
+      border: 4px solid var(--block-border);
+    }
+
+    .chat-box {
+      flex: 1;
+      background-color: var(--dirt);
+      overflow-y: auto;
+      padding: 15px;
+      border: 4px solid var(--block-border);
+      margin: 15px 0;
+    }
+
+    .user-message, .ai-message {
+      padding: 10px;
+      margin: 10px 0;
+      background-color: var(--sky);
+      color: #000;
+      border: 2px solid var(--block-border);
+    }
+
+    .user-message {
+      text-align: right;
+      background-color: #79c259;
+    }
+
+    .ai-message {
+      text-align: left;
+      background-color: #c2f2ff;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-family: 'Press Start 2P', cursive;
+      background: #e0e0e0;
+      border: 3px solid var(--block-border);
+      font-size: 10px;
+    }
+
+    button {
+      background: var(--grass);
+      color: white;
+      border: 3px solid var(--block-border);
+      padding: 10px 15px;
+      font-family: 'Press Start 2P', cursive;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4f6912;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="header-text">
+      <h1>Adamya AI</h1>
+    </div>
+    <div class="chat-box" id="chat-box"></div>
+    <form id="chat-form">
+      <input type="text" name="user_input" placeholder="Type your message..." required id="inputt" />
+      <button type="submit"><i class="fas fa-paper-plane"></i></button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('chat-form').onsubmit = async function (event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      const chatBox = document.getElementById('chat-box');
+      const userInput = formData.get('user_input');
+
+      const userMessageDiv = document.createElement('div');
+      userMessageDiv.className = 'user-message';
+      userMessageDiv.textContent = userInput;
+      chatBox.appendChild(userMessageDiv);
+
+      const typing = document.createElement('div');
+      typing.className = 'ai-message';
+      typing.textContent = 'Adamya is typing...';
+      chatBox.appendChild(typing);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      this.reset();
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+        chatBox.removeChild(typing);
+
+        const aiMessageDiv = document.createElement('div');
+        aiMessageDiv.className = 'ai-message';
+        aiMessageDiv.textContent = data.response;
+        chatBox.appendChild(aiMessageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        typing.textContent = 'Oops! Something went wrong.';
+      }
+    };
+  </script>
 </body>
 </html>
