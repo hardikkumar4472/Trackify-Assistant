@@ -1714,12 +1714,12 @@
     function formatAIResponse(text) {
         // Replace markdown with HTML
         text = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--secondary-color); text-shadow: 0 0 5px var(--secondary-color);">$1</strong>');
-        text = text.replace(/\*(.*?)\*/g, '<em style="color: var(--accent-color);">$1</em>');
-        text = text.replace(/\n(\d+\.)\s/g, '<br>$1 ');
-        text = text.replace(/\n\n/g, '</p><p>');
-        text = text.replace(/\n/g, '<br>');
-        text = `<p>${text}</p>`;
-        text = text.replace(/"([^"]+)"/g, '<span class="quote">"$1"</span>');
+  text = text.replace(/\*(.*?)\*/g, '<em style="color: var(--accent-color);">$1</em>');
+  text = text.replace(/\n(\d+\.)\s/g, '<br>$1 ');
+  text = text.replace(/\n\n/g, '</p><p>');
+  text = text.replace(/\n/g, '<br>');
+  text = `<p>${text}</p>`;
+  text = text.replace(/"([^"]+)"/g, '<span class="quote">"$1"</span>');
         
         // Add random achievements
         const achievements = [
