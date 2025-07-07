@@ -16,22 +16,13 @@ model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
 )
-system_prompt = """You are Trackify AI, an expert in habits and habit tracking. 
-You know everything about:
-- How habits are formed and broken
-- Habit tracking methodologies
-- Behavior change techniques
-- Motivation strategies
-- Common challenges in habit formation
-- Habit tracker tools and apps"""
+system_prompt = """You are a adamya AI which can give any information related to real world. if someone ask who are you then say i am adamaya AI"""
 
 chat_sessions = {}
 
 def GenerateResponse(user_input, session_id):
     if session_id not in chat_sessions:
-        # Start a new chat session with the system prompt
         chat_sessions[session_id] = model.start_chat(history=[])
-        # Send the system prompt first to set the context
         chat_sessions[session_id].send_message(system_prompt)
 
     chat_session = chat_sessions[session_id]
