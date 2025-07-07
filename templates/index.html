@@ -650,1001 +650,1284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Adamya AI</title>
-  <link rel="shortcut icon" href="/static/images/minecraft_icon.png" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <style>
-    :root {
-      --grass: #5e7c16;
-      --dirt: #835c3b;
-      --sky: #7ec0ee;
-      --stone: #7d7d7d;
-      --wood: #8b4513;
-      --planks: #c2b280;
-      --text-color: #ffffff;
-      --block-border: #2e2e2e;
-      --hotbar-slot: #8b8b8b;
-      --health-color: #ff0000;
-      --hunger-color: #f2b01e;
-      --xp-color: #7cfc00;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Press Start 2P', cursive;
-      background: #000;
-      color: var(--text-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      overflow: hidden;
-      image-rendering: pixelated;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: url('/static/images/minecraft_dynamic_bg.jpg') center/cover no-repeat;
-      z-index: -3;
-      opacity: 0.9;
-      animation: parallax 120s linear infinite;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: url('/static/images/mobs_sprite.gif') center center/contain no-repeat;
-      z-index: -2;
-      opacity: 0.3;
-      animation: moveMobs 60s linear infinite;
-    }
-
-    @keyframes parallax {
-      0% { background-position: 0 0; }
-      100% { background-position: -2000px 0; }
-    }
-
-    @keyframes moveMobs {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-    }
-
-    @keyframes blockBreak {
-      0% { background-position: 0 0; }
-      100% { background-position: -256px 0; }
-    }
-
-    @keyframes sparkle {
-      0% { opacity: 0; transform: scale(0); }
-      50% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0); }
-    }
-
-    @keyframes lavaBubble {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-20px) scale(1.2); }
-    }
-
-    @keyframes portalSwirl {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes enchantmentGlow {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.5) drop-shadow(0 0 5px #a100a1); }
-    }
-
-    @keyframes redstonePulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    .minecraft-world {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .floating-block {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      background-size: cover;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .sparkle-particle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: url('/static/images/sparkle.png');
-      animation: sparkle 1s ease-in-out infinite;
-    }
-
-    .lava-particle {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      background: url('/static/images/lava_bubble.png');
-      animation: lavaBubble 2s ease-in-out infinite;
-    }
-
-    .portal-particle {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      background: url('/static/images/portal_swirl.png');
-      animation: portalSwirl 3s linear infinite;
-    }
-
-    .redstone-particle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: url('/static/images/redstone_dust.png');
-      animation: redstonePulse 1.5s ease-in-out infinite;
-    }
-
-    .smoke-particle {
-      position: absolute;
-      width: 15px;
-      height: 15px;
-      background: url('/static/images/smoke.png');
-      opacity: 0.5;
-      animation: float 4s ease-in-out infinite;
-    }
-
-    .loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000 url('/static/images/minecraft_loading_bg.jpg') center/cover no-repeat;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .loading-bar {
-      width: 300px;
-      height: 20px;
-      background: var(--dirt);
-      border: 3px solid var(--block-border);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .loading-fill {
-      width: 0%;
-      height: 100%;
-      background: var(--grass);
-      transition: width 2s ease-in-out;
-    }
-
-    .loading-text {
-      color: white;
-      text-shadow: 2px 2px #000;
-      font-size: 1rem;
-      margin-top: 20px;
-    }
-
-    .chat-container {
-      width: 90%;
-      max-width: 960px;
-      height: 90vh;
-      background-color: rgba(0, 0, 0, 0.8);
-      border: 8px solid var(--block-border);
-      box-shadow: 0 0 20px #222;
-      display: none; /* Hidden until loading completes */
-      flex-direction: column;
-      padding: 20px;
-      border-radius: 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .chat-container:hover {
-      cursor: url('/static/images/sword_cursor.png'), auto;
-    }
-
-    .chat-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('/static/images/minecraft_grid.png');
-      opacity: 0.1;
-      z-index: -1;
-    }
-
-    .header-text {
-      background: var(--grass);
-      padding: 10px;
-      text-align: center;
-      color: #fff;
-      font-size: 1.2rem;
-      text-shadow: 2px 2px #000;
-      border: 4px solid var(--block-border);
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      animation: enchantmentGlow 2s ease-in-out infinite;
-    }
-
-    .header-text::before, .header-text::after {
-      content: '';
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      background-image: url('/static/images/torch.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      filter: drop-shadow(0 0 5px orange);
-      animation: torchFlicker 0.5s steps(4) infinite;
-    }
-
-    @keyframes torchFlicker {
-      0% { opacity: 0.8; }
-      100% { opacity: 1; }
-    }
-
-    .header-text::before {
-      left: 10px;
-    }
-
-    .header-text::after {
-      right: 10px;
-    }
-
-    .chat-box {
-      flex: 1;
-      background-color: var(--dirt);
-      overflow-y: auto;
-      padding: 15px;
-      border: 4px solid var(--block-border);
-      margin: 15px 0;
-      position: relative; /* Fixed typo: changed 'reactant' to 'relative' */
-      animation: dirtPulse 5s ease-in-out infinite;
-    }
-
-    @keyframes dirtPulse {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.1); }
-    }
-
-    .chat-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('/static/images/dirt_texture.png');
-      opacity: 0.3;
-      pointer-events: none;
-    }
-
-    .user-message, .ai-message {
-      padding: 10px;
-      margin: 10px 0;
-      color: #000;
-      border: 2px solid var(--block-border);
-      position: relative;
-      max-width: 80%;
-      word-wrap: break-word;
-      transition: transform 0.2s;
-    }
-
-    .user-message:hover, .ai-message:hover {
-      transform: scale(1.05);
-    }
-
-    .user-message {
-      text-align: right;
-      background-color: #79c259;
-      margin-left: auto;
-      border-radius: 8px 8px 0 8px;
-    }
-
-    .user-message::after {
-      content: '';
-      position: absolute;
-      right: -10px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      background-image: url('/static/images/steve_head.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      animation: headBob 2s ease-in-out infinite;
-    }
-
-    .ai-message {
-      text-align: left;
-      background-color: #c2f2ff;
-      margin-right: auto;
-      border-radius: 8px 8px 8px 0;
-    }
-
-    .ai-message::before {
-      content: '';
-      position: absolute;
-      left: -10px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      background-image: url('/static/images/villager_head.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      animation: headBob 2s ease-in-out infinite;
-    }
-
-    @keyframes headBob {
-      0%, 100% { transform: translateY(-50%); }
-      50% { transform: translateY(-40%); }
-    }
-
-    form {
-      display: flex;
-      gap: 10px;
-      position: relative;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      font-family: 'Press Start 2P', cursive;
-      background: #e0e0e0;
-      border: 3px solid var(--block-border);
-      font-size: 10px;
-      background-image: url('/static/images/stone_texture.png');
-      background-size: 100px;
-      color: white;
-      text-shadow: 1px 1px 2px black;
-      transition: background-color 0.3s;
-    }
-
-    input[type="text"]:hover {
-      background-color: #d0d0d0;
-    }
-
-    button {
-      background: var(--grass);
-      color: white;
-      border: 3px solid var(--block-border);
-      padding: 10px 15px;
-      font-family: 'Press Start 2P', cursive;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s;
-      background-image: url('/static/images/grass_side.png');
-      background-size: 50px;
-    }
-
-    button:hover {
-      background-color: #4f6912;
-      transform: translateY(-2px);
-      animation: buttonGlow 1s ease-in-out infinite;
-    }
-
-    @keyframes buttonGlow {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.2); }
-    }
-
-    button:active {
-      transform: translateY(1px);
-    }
-
-    button::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: rgba(255, 255, 255, 0.1);
-      transform: rotate(45deg);
-      pointer-events: none;
-    }
-
-    button:hover::after {
-      animation: buttonShine 1.5s ease infinite;
-    }
-
-    @keyframes buttonShine {
-      0% { left: -50%; }
-      100% { left: 150%; }
-    }
-
-    .hotbar {
-      position: absolute;
-      bottom: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 5px;
-      border: 3px solid var(--block-border);
-      border-radius: 5px;
-      z-index: 10;
-    }
-
-    .hotbar-slot {
-      width: 40px;
-      height: 40px;
-      margin: 0 2px;
-      background-color: var(--hotbar-slot);
-      border: 2px solid var(--block-border);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      transition: transform 0.2s;
-    }
-
-    .hotbar-slot:hover {
-      transform: scale(1.1);
-    }
-
-    .hotbar-slot.selected {
-      border-color: white;
-      box-shadow: 0 0 10px white;
-      animation: pulse 1s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    .hotbar-slot img {
-      width: 32px;
-      height: 32px;
-      image-rendering: pixelated;
-    }
-
-    .health-bar {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .health-icon {
-      width: 20px;
-      height: 20px;
-      background-image: url('/static/images/heart.png');
-      background-size: contain;
-      margin-right: 5px;
-      animation: heartBeat 1s ease-in-out infinite;
-    }
-
-    @keyframes heartBeat {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
-    .health-text {
-      color: var(--health-color);
-      text-shadow: 1px 1px 2px black;
-    }
-
-    .hunger-bar {
-      position: absolute;
-      top: 40px;
-      left: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .hunger-icon {
-      width: 20px;
-      height: 20px;
-      background-image: url('/static/images/hunger.png');
-      background-size: contain;
-      margin-right: 5px;
-      animation: hungerShake 2s ease-in-out infinite;
-    }
-
-    @keyframes hungerShake {
-      0%, 100% { transform: translateX(0); }
-      10%, 90% { transform: translateX(-2px); }
-      20%, 80% { transform: translateX(2px); }
-    }
-
-    .hunger-text {
-      color: var(--hunger-color);
-      text-shadow: 1px 1px 2px black;
-    }
-
-    .xp-bar {
-      position: absolute;
-      bottom: 60px;
-      left: 10px;
-      width: 100px;
-      height: 10px;
-      background-color: rgba(0, 0, 0, 0.5);
-      border: 2px solid var(--block-border);
-    }
-
-    .xp-fill {
-      height: 100%;
-      width: 70%;
-      background-color: var(--xp-color);
-      animation: xpGlow 2s ease-in-out infinite;
-    }
-
-    @keyframes xpGlow {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.3); }
-    }
-
-    .xp-text {
-      position: absolute;
-      bottom: 75px;
-      left: 10px;
-      font-size: 0.6rem;
-      color: var(--xp-color);
-      text-shadow: 1px 1px 2px black;
-    }
-
-    .day-night-indicator {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 40px;
-      height: 40px;
-      background-image: url('/static/images/sun.png');
-      background-size: contain;
-      animation: dayNightCycle 60s linear infinite;
-    }
-
-    @keyframes dayNightCycle {
-      0%, 100% { background-image: url('/static/images/sun.png'); opacity: 1; }
-      50% { background-image: url('/static/images/moon.png'); opacity: 0.8; }
-    }
-
-    .block-breaking {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      background-image: url('/static/images/block_breaking.png');
-      animation: blockBreak 0.8s steps(8) infinite;
-      display: none;
-    }
-
-    .minecraft-button {
-      background-color: var(--planks);
-      color: white;
-      border: 3px solid var(--block-border);
-      padding: 8px 12px;
-      font-family: 'Press Start 2P', cursive;
-      cursor: pointer;
-      font-size: 0.7rem;
-      text-shadow: 1px 1px 2px black;
-      margin: 5px;
-      background-image: url('/static/images/planks_texture.png');
-      background-size: 50px;
-      transition: transform 0.2s;
-    }
-
-    .minecraft-button:hover {
-      background-color: #a38b5e;
-      transform: scale(1.05);
-    }
-
-    .crafting-table {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: var(--planks);
-      border: 5px solid var(--block-border);
-      padding: 20px;
-      display: none;
-      z-index: 100;
-      background-image: url('/static/images/crafting_table.png');
-      background-size: 100px;
-      animation: craftingPulse 3s ease-in-out infinite;
-    }
-
-    @keyframes craftingPulse {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.2); }
-    }
-
-    .inventory {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: var(--planks);
-      border: 5px solid var(--block-border);
-      padding: 20px;
-      display: none;
-      z-index: 100;
-      background-image: url('/static/images/inventory_bg.png');
-      background-size: cover;
-      animation: inventoryPulse 3s ease-in-out infinite;
-    }
-
-    @keyframes inventoryPulse {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.2); }
-    }
-
-    .particle {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      background-color: white;
-      border-radius: 50%;
-      pointer-events: none;
-      opacity: 0;
-    }
-
-    .tooltip {
-      position: absolute;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 5px;
-      border: 2px solid var(--block-border);
-      font-size: 0.7rem;
-      pointer-events: none;
-      display: none;
-      z-index: 1000;
-      animation: tooltipFade 0.3s ease-in-out;
-    }
-
-    @keyframes tooltipFade {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adamya AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --primary-color: #6a00ff;
+            --secondary-color: #00ff88;
+            --accent-color: #ff00aa;
+            --dark-bg: #0a0a1a;
+            --darker-bg: #050510;
+            --text-color: #e0e0ff;
+            --text-glow: 0 0 10px var(--secondary-color);
+            --neon-border: 0 0 10px var(--primary-color);
+            --pixel-size: 2px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-color);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+        
+        .game-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(106, 0, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(106, 0, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            animation: gridScroll 60s linear infinite;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: floatParticle linear infinite;
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(0, 0, 0, 0) 49%,
+                rgba(0, 255, 136, 0.05) 50%,
+                rgba(0, 0, 0, 0) 51%
+            );
+            background-size: 100% 4px;
+            z-index: 2;
+            pointer-events: none;
+            animation: scanlineScroll 0.5s linear infinite;
+        }
+        
+        .glow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(106, 0, 255, 0.1) 0%, transparent 70%);
+            z-index: 3;
+            pointer-events: none;
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+        }
+        
+        .chat-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            max-height: 100vh;
+            position: relative;
+            z-index: 10;
+            background: rgba(10, 10, 26, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(106, 0, 255, 0.5);
+            box-shadow: 
+                0 0 30px rgba(106, 0, 255, 0.3),
+                inset 0 0 20px rgba(106, 0, 255, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 10px;
+            transform-style: preserve-3d;
+        }
+        
+        .header-container {
+            position: relative;
+            margin-bottom: 20px;
+            transform-style: preserve-3d;
+        }
+        
+        .header-text {
+            background: linear-gradient(135deg, rgba(106, 0, 255, 0.3), rgba(0, 255, 136, 0.2));
+            box-shadow: 
+                0 0 20px rgba(208, 255, 0, 0.3),
+                inset 0 0 10px rgba(0, 255, 136, 0.2);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 15px;
+            padding: 20px;
+            animation: 
+                fadeInDown 1s both,
+                headerFloat 6s ease-in-out infinite;
+            transform-origin: top center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(106, 0, 255, 0.5);
+        }
+        
+        .header-text::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent,
+                transparent,
+                transparent,
+                rgba(0, 255, 136, 0.1),
+                transparent,
+                transparent,
+                transparent
+            );
+            transform: rotate(30deg);
+            animation: shine 6s linear infinite;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--secondary-color);
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 
+                0 0 10px var(--secondary-color),
+                0 0 20px var(--secondary-color),
+                0 0 30px var(--secondary-color);
+            margin: 5px 0;
+            padding: 5px;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            animation: textGlow 3s infinite alternate, textFlicker 5s infinite;
+            letter-spacing: 2px;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '◄►';
+            position: absolute;
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            animation: blink 1s infinite alternate;
+        }
+        
+        h1::before {
+            content: '◄►';
+            position: absolute;
+            left: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            animation: blink 1s infinite alternate-reverse;
+        }
+        
+        h5 {
+            text-align: center;
+            color: var(--text-color);
+            font-family: 'Ubuntu Mono', monospace;
+            margin: 5px 0;
+            padding: 5px;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            animation: fadeIn 1.5s both 0.3s;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+        
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid rgba(106, 0, 255, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            background: rgba(5, 5, 16, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            backdrop-filter: blur(5px);
+            box-shadow: 
+                inset 0 0 20px rgba(106, 0, 255, 0.2),
+                0 0 30px rgba(106, 0, 255, 0.1);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            transform-style: preserve-3d;
+        }
+        
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+            opacity: 0.8;
+            text-shadow: 0 0 5px var(--secondary-color);
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            color: var(--text-color);
+            background: linear-gradient(135deg, rgba(106, 0, 255, 0.4), rgba(255, 0, 170, 0.3));
+            border-radius: 15px 15px 0 15px;
+            padding: 15px 20px;
+            max-width: 85%;
+            word-wrap: break-word;
+            box-shadow: 
+                0 0 15px rgba(106, 0, 255, 0.3),
+                inset 0 0 10px rgba(255, 0, 170, 0.2);
+            animation: 
+                slideInRight 0.5s both, 
+                float 3s ease-in-out infinite;
+            transform-origin: right center;
+            position: relative;
+            border: 1px solid rgba(106, 0, 255, 0.5);
+            font-family: 'Ubuntu Mono', monospace;
+            line-height: 1.6;
+        }
+        
+        .user-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            animation: borderGlow 2s infinite;
+        }
+        
+        .user-message::after {
+            content: 'LVL 99';
+            position: absolute;
+            bottom: -15px;
+            right: 10px;
+            font-size: 0.6rem;
+            color: var(--secondary-color);
+            text-shadow: 0 0 5px var(--secondary-color);
+            opacity: 0.7;
+        }
+        
+        .ai-message {
+            align-self: flex-start;
+            color: var(--text-color);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 136, 255, 0.2));
+            border-radius: 15px 15px 15px 0;
+            padding: 15px 20px;
+            max-width: 85%;
+            word-wrap: break-word;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 136, 0.2),
+                inset 0 0 10px rgba(0, 136, 255, 0.2);
+            animation: 
+                slideInLeft 0.5s both, 
+                float 3s ease-in-out infinite 0.5s;
+            transform-origin: left center;
+            position: relative;
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            font-family: 'Ubuntu Mono', monospace;
+            line-height: 1.6;
+        }
+        
+        .ai-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--secondary-color), transparent);
+            animation: borderGlow 2s infinite 0.5s;
+        }
+        
+        .ai-message::after {
+            content: 'NPC';
+            position: absolute;
+            bottom: -15px;
+            left: 10px;
+            font-size: 0.6rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color);
+            opacity: 0.7;
+        }
+        
+        .message-divider {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            color: var(--primary-color);
+            opacity: 0.7;
+            font-size: 0.8rem;
+        }
+        
+        .message-divider::before,
+        .message-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            margin: 0 10px;
+        }
+        
+        form {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            animation: fadeInUp 1s both;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .input-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 18px 25px 18px 50px;
+            border: 1px solid rgba(106, 0, 255, 0.7);
+            border-radius: 50px;
+            background: rgba(5, 5, 16, 0.8);
+            color: white;
+            font-size: 16px;
+            font-family: 'Ubuntu Mono', monospace;
+            transition: all 0.3s;
+            box-shadow: 
+                0 0 20px rgba(106, 0, 255, 0.3),
+                inset 0 0 10px rgba(0, 255, 136, 0.1);
+            text-shadow: 0 0 5px var(--primary-color);
+            position: relative;
+            z-index: 2;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 136, 0.5),
+                inset 0 0 15px rgba(106, 0, 255, 0.3);
+            transform: scale(1.02);
+        }
+        
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            text-shadow: none;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            z-index: 3;
+            text-shadow: 0 0 5px var(--secondary-color);
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 
+                0 0 20px rgba(106, 0, 255, 0.5),
+                0 5px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            z-index: 2;
+            transition: all 0.3s;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent,
+                transparent,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent,
+                transparent,
+                transparent
+            );
+            transform: rotate(30deg);
+            animation: shine 3s linear infinite;
+        }
+        
+        button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 136, 0.7),
+                0 8px 15px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 0 10px white;
+        }
+        
+        button:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 
+                0 0 15px rgba(106, 0, 255, 0.5),
+                0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        button i {
+            margin-left: 8px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-self: flex-start;
+            padding: 15px 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 15px 15px 15px 0;
+            margin-bottom: 10px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.1);
+            position: relative;
+        }
+        
+        .typing-indicator::before {
+            content: 'AI is typing...';
+            position: absolute;
+            bottom: -18px;
+            left: 10px;
+            font-size: 0.6rem;
+            color: var(--secondary-color);
+            opacity: 0.7;
+            text-shadow: 0 0 5px var(--secondary-color);
+        }
+        
+        .typing-dot {
+            width: 10px;
+            height: 10px;
+            margin: 0 3px;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--secondary-color);
+            opacity: 0.4;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation: typingAnimation 1.5s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation: typingAnimation 1.5s infinite ease-in-out 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation: typingAnimation 1.5s infinite ease-in-out 0.4s;
+        }
+        
+        .ai-message p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        
+        .ai-message .quote {
+            color: #a0a0ff;
+            font-style: italic;
+            display: inline-block;
+            transform: translateY(2px);
+            text-shadow: 0 0 5px #a0a0ff;
+        }
+        
+        .ai-message br {
+            display: block;
+            content: "";
+            margin: 8px 0;
+        }
+        
+        .achievement-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid gold;
+            border-radius: 10px;
+            padding: 3px 8px;
+            margin: 5px 0;
+            font-size: 0.8rem;
+            color: gold;
+            text-shadow: 0 0 5px gold;
+            animation: pulse 2s infinite;
+        }
+        
+        .xp-bar {
+            height: 5px;
+            background: rgba(106, 0, 255, 0.3);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .xp-progress {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 5px;
+            animation: xpFill 2s forwards;
+        }
+        
+        .xp-text {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.6rem;
+            color: var(--text-color);
+            text-shadow: 0 0 3px var(--text-color);
+        }
+        
+        .level-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(106, 0, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(106, 0, 255, 0.3);
+        }
+        
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .level-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        
+        .level-text {
+            font-size: 0.9rem;
+        }
+        
+        .level-number {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+        
+        .game-button {
+            background: rgba(255, 0, 170, 0.2);
+            border: 1px solid var(--accent-color);
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 0 0 5px var(--accent-color);
+        }
+        
+        .game-button:hover {
+            background: rgba(255, 0, 170, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        
+        .pixel-corners {
+            position: relative;
+        }
+        
+        .pixel-corners::before,
+        .pixel-corners::after {
+            content: '';
+            position: absolute;
+            width: var(--pixel-size);
+            height: var(--pixel-size);
+            background: var(--secondary-color);
+        }
+        
+        .pixel-corners::before {
+            top: 0;
+            left: 0;
+            box-shadow: 
+                0 0 0 var(--pixel-size) var(--secondary-color),
+                0 0 0 calc(var(--pixel-size) * 2) var(--secondary-color);
+        }
+        
+        .pixel-corners::after {
+            bottom: 0;
+            right: 0;
+            box-shadow: 
+                0 0 0 var(--pixel-size) var(--secondary-color),
+                0 0 0 calc(var(--pixel-size) * 2) var(--secondary-color);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInDown {
+            from { 
+                opacity: 0; 
+                transform: translateY(-30px) scale(0.95);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from { 
+                opacity: 0; 
+                transform: translateX(-30px) rotateY(90deg);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0) rotateY(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from { 
+                opacity: 0; 
+                transform: translateX(30px) rotateY(-90deg);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0) rotateY(0);
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 5px var(--secondary-color); }
+            50% { text-shadow: 0 0 15px var(--secondary-color), 0 0 30px var(--secondary-color); }
+            100% { text-shadow: 0 0 5px var(--secondary-color); }
+        }
+        
+        @keyframes textFlicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 
+                    0 0 10px var(--secondary-color),
+                    0 0 20px var(--secondary-color),
+                    0 0 30px var(--secondary-color);
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+        
+        @keyframes borderGlow {
+            0% { opacity: 0; width: 0; }
+            50% { opacity: 1; width: 100%; }
+            100% { opacity: 0; width: 0; }
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        @keyframes typingAnimation {
+            0%, 100% { 
+                opacity: 0.4; 
+                transform: translateY(0) scale(0.9);
+            }
+            50% { 
+                opacity: 1; 
+                transform: translateY(-5px) scale(1.1);
+            }
+        }
+        
+        @keyframes gridScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
+        }
+        
+        @keyframes scanlineScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 4px; }
+        }
+        
+        @keyframes pulseGlow {
+            0% { opacity: 0.3; transform: scale(0.95); }
+            100% { opacity: 0.6; transform: scale(1.05); }
+        }
+        
+        @keyframes floatParticle {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+        }
+        
+        @keyframes headerFloat {
+            0%, 100% { transform: translateY(0) rotateX(0); }
+            50% { transform: translateY(-10px) rotateX(5deg); }
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes xpFill {
+            0% { width: 0; }
+            100% { width: var(--xp-percent, 50%); }
+        }
+        
+        .chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-box::-webkit-scrollbar-track {
+            background: rgba(106, 0, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .chat-box::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+        
+        @media (max-width: 992px) {
+            .chat-container {
+                padding: 15px;
+            }
+            
+            .header-text {
+                max-width: 90%;
+                padding: 15px;
+            }
+            
+            input[type="text"] {
+                padding: 15px 20px 15px 45px;
+            }
+            
+            button {
+                padding: 0 25px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: 10px;
+                height: 100vh;
+                max-height: -webkit-fill-available;
+            }
+            
+            .header-text {
+                max-width: 100%;
+                border-radius: 12px;
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h5 {
+                font-size: 1rem;
+            }
+            
+            .chat-box {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .user-message, .ai-message {
+                max-width: 90%;
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+            
+            input[type="text"] {
+                padding: 12px 15px 12px 40px;
+                font-size: 0.95rem;
+            }
+            
+            button {
+                padding: 0 20px;
+                font-size: 16px;
+            }
+            
+            .input-icon {
+                left: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chat-container {
+                padding: 8px;
+                border-radius: 0;
+            }
+            
+            .header-text {
+                padding: 10px;
+                border-radius: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin: 3px 0;
+            }
+            
+            h5 {
+                font-size: 0.85rem;
+                margin: 3px 0;
+            }
+            
+            .chat-box {
+                padding: 10px;
+                gap: 12px;
+            }
+            
+            .user-message, .ai-message {
+                max-width: 95%;
+                padding: 10px 14px;
+                font-size: 0.9rem;
+            }
+            
+            input[type="text"] {
+                padding: 10px 12px 10px 35px;
+                font-size: 0.9rem;
+            }
+            
+            button {
+                padding: 0 15px;
+                font-size: 14px;
+            }
+            
+            .input-icon {
+                left: 12px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-height: 500px) and (orientation: landscape) {
+            .chat-container {
+                height: 100vh;
+                max-height: -webkit-fill-available;
+            }
+            
+            .header-text {
+                padding: 8px 12px;
+                margin-bottom: 8px;
+            }
+            
+            h1 {
+                margin: 2px 0;
+                font-size: 1.2rem;
+            }
+            
+            h5 {
+                margin: 2px 0;
+                font-size: 0.7rem;
+            }
+            
+            .chat-box {
+                padding: 8px;
+                gap: 10px;
+            }
+            
+            .user-message, .ai-message {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            
+            input[type="text"] {
+                padding: 8px 10px 8px 30px;
+                font-size: 0.85rem;
+            }
+            
+            button {
+                padding: 0 12px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="loading-screen" id="loading-screen">
-    <img src="/static/images/minecraft_logo.png" alt="Minecraft Logo" style="width: 300px; margin-bottom: 20px;">
-    <div class="loading-bar">
-      <div class="loading-fill" id="loading-fill"></div>
+    <div class="game-grid"></div>
+    <div class="particles" id="particles"></div>
+    <div class="scanlines"></div>
+    <div class="glow-overlay"></div>
+    
+    <div class="chat-container">
+        <div class="header-container">
+            <div class="header-text pixel-corners">
+                <h1 style="color:black;">Adamya AI</h1>
+            </div>
+        </div>
+        
+        <div class="chat-box" id="chat-box"></div>
+        
+        <form id="chat-form">
+            <div class="input-container">
+                <i class="fas fa-terminal input-icon"></i>
+                <input type="text" name="user_input" placeholder="Enter your Message..." required id="inputt" autocomplete="off">
+            </div>
+            <button type="submit">Send <i class="fas fa-paper-plane"></i></button>
+        </form>
     </div>
-    <div class="loading-text">Loading Adamya AI...</div>
-  </div>
 
-  <div class="minecraft-world" id="minecraft-world">
-    <!-- Floating blocks and particles will be added here by JavaScript -->
-  </div>
-
-  <div class="chat-container" id="chat-container">
-    <div class="header-text">
-      <h1>Adamya AI</h1>
-    </div>
-    
-    <div class="health-bar">
-      <div class="health-icon"></div>
-      <span class="health-text">20/20</span>
-    </div>
-    
-    <div class="hunger-bar">
-      <div class="hunger-icon"></div>
-      <span class="hunger-text">20/20</span>
-    </div>
-    
-    <div class="xp-bar">
-      <div class="xp-fill"></div>
-    </div>
-    <div class="xp-text">Level 5</div>
-    
-    <div class="day-night-indicator"></div>
-    
-    <div class="chat-box" id="chat-box"></div>
-    
-    <form id="chat-form">
-      <input type="text" name="user_input" placeholder="Type your message..." required id="inputt" />
-      <button type="submit"><i class="fas fa-paper-plane"></i></button>
-    </form>
-    
-    <div class="hotbar">
-      <div class="hotbar-slot selected"><img src="/static/images/dirt_block.png" alt="Dirt"></div>
-      <div class="hotbar-slot"><img src="/static/images/stone_block.png" alt="Stone"></div>
-      <div class="hotbar-slot"><img src="/static/images/wood_block.png" alt="Wood"></div>
-      <div class="hotbar-slot"><img src="/static/images/crafting_table.png" alt="Crafting Table"></div>
-      <div class="hotbar-slot"><img src="/static/images/furnace.png" alt="Furnace"></div>
-      <div class="hotbar-slot"><img src="/static/images/sword.png" alt="Sword"></div>
-      <div class="hotbar-slot"><img src="/static/images/pickaxe.png" alt="Pickaxe"></div>
-      <div class="hotbar-slot"><img src="/static/images/axe.png" alt="Axe"></div>
-      <div class="hotbar-slot"><img src="/static/images/bread.png" alt="Food"></div>
-    </div>
-    
-    <div class="block-breaking" id="block-breaking"></div>
-    <div class="tooltip" id="tooltip"></div>
-  </div>
-  
-  <div class="crafting-table" id="crafting-table">
-    <h2>Crafting</h2>
-    <div style="display: grid; grid-template-columns: repeat(3, 50px); gap: 5px; margin: 10px 0;">
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-      <div class="crafting-slot" style="width: 50px; height: 50px; border: 2px solid var(--block-border);"></div>
-    </div>
-    <div style="text-align: center; margin: 10px 0;">
-      <div style="width: 50px; height: 50px; border: 2px solid var(--block-border); margin: 0 auto;"></div>
-      <button class="minecraft-button">Craft</button>
-    </div>
-    <button class="minecraft-button" style="position: absolute; top: 5px; right: 5px;" onclick="document.getElementById('crafting-table').style.display = 'none'">X</button>
-  </div>
-  
-  <div class="inventory" id="inventory">
-    <h2>Inventory</h2>
-    <div style="display: grid; grid-template-columns: repeat(9, 40px); gap: 5px; margin: 10px 0;">
-      <!-- Inventory slots will be added here -->
-    </div>
-    <button class="minecraft-button" style="position: absolute; top: 5px; right: 5px;" onclick="document.getElementById('inventory').style.display = 'none'">X</button>
-  </div>
-
-  <script>
-    // Loading screen functionality
-    window.addEventListener('load', () => {
-      const loadingScreen = document.getElementById('loading-screen');
-      const loadingFill = document.getElementById('loading-fill');
-      const chatContainer = document.getElementById('chat-container');
-      
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 5;
-        loadingFill.style.width = `${progress}%`;
-        if (progress >= 100) {
-          clearInterval(interval);
-          loadingScreen.style.display = 'none';
-          chatContainer.style.display = 'flex';
+    <script>
+    // Create particles
+    function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 30;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random position
+            const posX = Math.random() * 100;
+            const posY = Math.random() * 100 + 100; // Start below viewport
+            
+            particle.style.left = `${posX}%`;
+            particle.style.top = `${posY}%`;
+            
+            // Random size
+            const size = Math.random() * 3 + 1;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random animation duration
+            const duration = Math.random() * 20 + 10;
+            particle.style.animationDuration = `${duration}s`;
+            
+            // Random delay
+            const delay = Math.random() * 10;
+            particle.style.animationDelay = `-${delay}s`;
+            
+            particlesContainer.appendChild(particle);
         }
-      }, 100);
-    });
-
-    // Original chat functionality (unchanged)
-    document.getElementById('chat-form').onsubmit = async function (event) {
-      event.preventDefault();
-      const formData = new FormData(this);
-      const chatBox = document.getElementById('chat-box');
-      const userInput = formData.get('user_input');
-
-      const userMessageDiv = document.createElement('div');
-      userMessageDiv.className = 'user-message';
-      userMessageDiv.textContent = userInput;
-      chatBox.appendChild(userMessageDiv);
-
-      const typing = document.createElement('div');
-      typing.className = 'ai-message';
-      typing.textContent = 'Adamya is typing...';
-      chatBox.appendChild(typing);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      this.reset();
-
-      try {
-        const response = await fetch('/chat', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const data = await response.json();
-        chatBox.removeChild(typing);
-
-        const aiMessageDiv = document.createElement('div');
-        aiMessageDiv.className = 'ai-message';
-        aiMessageDiv.textContent = data.response;
-        chatBox.appendChild(aiMessageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } catch (err) {
-        typing.textContent = 'Oops! Something went wrong.';
-      }
-    };
-
-    // Enhanced Minecraft UI functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      // Create floating blocks and particles
-      const world = document.getElementById('minecraft-world');
-      const blockTypes = ['dirt', 'stone', 'wood', 'gold', 'diamond', 'emerald', 'redstone', 'lapis', 'coal', 'iron'];
-      const particleTypes = ['sparkle', 'lava', 'portal', 'redstone', 'smoke'];
-      
-      for (let i = 0; i < 50; i++) {
-        const block = document.createElement('div');
-        block.className = 'floating-block';
-        const randomBlock = blockTypes[Math.floor(Math.random() * blockTypes.length)];
-        block.style.backgroundImage = `url('/static/images/${randomBlock}_block.png')`;
-        block.style.left = `${Math.random() * 100}%`;
-        block.style.top = `${Math.random() * 100}%`;
-        block.style.animationDuration = `${3 + Math.random() * 4}s`;
-        block.style.animationDelay = `${Math.random() * 5}s`;
-        world.appendChild(block);
-      }
-
-      for (let i = 0; i < 60; i++) {
-        const particle = document.createElement('div');
-        const randomParticle = particleTypes[Math.floor(Math.random() * particleTypes.length)];
-        particle.className = `${randomParticle}-particle`;
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        particle.style.animationDelay = `${Math.random() * 5}s`;
-        world.appendChild(particle);
-      }
-
-      // Hotbar selection
-      const hotbarSlots = document.querySelectorAll('.hotbar-slot');
-      hotbarSlots.forEach((slot, index) => {
-        slot.addEventListener('click', () => {
-          hotbarSlots.forEach(s => s.classList.remove('selected'));
-          slot.classList.add('selected');
-          
-          if (index < 5) {
-            const blockBreaking = document.getElementById('block-breaking');
-            blockBreaking.style.display = 'block';
-            blockBreaking.style.left = `${Math.random() * 80 + 10}%`;
-            blockBreaking.style.top = `${Math.random() * 80 + 10}%`;
-            setTimeout(() => {
-              blockBreaking.style.display = 'none';
-              createParticles(blockBreaking.getBoundingClientRect().left + 16, blockBreaking.getBoundingClientRect().top + 16, 15);
-            }, 800);
-          }
-        });
-      });
-
-      // Tooltips for hotbar items
-      hotbarSlots.forEach(slot => {
-        const img = slot.querySelector('img');
-        if (img) {
-          const tooltip = document.getElementById('tooltip');
-          const itemName = img.alt;
-          
-          slot.addEventListener('mouseenter', (e) => {
-            tooltip.textContent = itemName;
-            tooltip.style.display = 'block';
-            tooltip.style.left = `${e.pageX + 10}px`;
-            tooltip.style.top = `${e.pageY + 10}px`;
-          });
-          
-          slot.addEventListener('mousemove', (e) => {
-            tooltip.style.left = `${e.pageX + 10}px`;
-            tooltip.style.top = `${e.pageY + 10}px`;
-          });
-          
-          slot.addEventListener('mouseleave', () => {
-            tooltip.style.display = 'none';
-          });
-        }
-      });
-
-      // Day-night cycle with additional effects
-      setInterval(() => {
-        const indicator = document.querySelector('.day-night-indicator');
-        const hour = new Date().getHours();
-        const isDay = hour > 6 && hour < 18;
-        document.body.style.filter = isDay ? 'brightness(1)' : 'brightness(0.7)';
-        createParticles(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 5, isDay ? '#ffffff' : '#a100a1');
-      }, 1000);
-
-      // Simulate health/hunger/xp changes with particle effects
-      setInterval(() => {
-        const healthText = document.querySelector('.health-text');
-        const hungerText = document.querySelector('.hunger-text');
-        const xpFill = document.querySelector('.xp-fill');
-        const xpText = document.querySelector('.xp-text');
-        
-        const health = Math.max(1, Math.min(20, parseInt(healthText.textContent) + (Math.random() > 0.95 ? -1 : Math.random() > 0.98 ? 1 : 0)));
-        const hunger = Math.max(0, Math.min(20, parseInt(hungerText.textContent) + (Math.random() > 0.96 ? -1 : 0)));
-        const xp = Math.min(100, parseFloat(xpFill.style.width) + (Math.random() > 0.9 ? 5 : 0));
-        
-        healthText.textContent = `${health}/20`;
-        hungerText.textContent = `${hunger}/20`;
-        xpFill.style.width = `${xp}%`;
-        
-        if (xp >= 100) {
-          xpFill.style.width = '0%';
-          const level = parseInt(xpText.textContent.replace('Level ', '')) + 1;
-          xpText.textContent = `Level ${level}`;
-          createParticles(30, window.innerHeight - 80, 30, 'var(--xp-color)');
-        }
-
-        if (Math.random() > 0.95) {
-          createParticles(30, 50, 10, 'var(--health-color)');
-        }
-        if (Math.random() > 0.96) {
-          createParticles(30, 80, 10, 'var(--hunger-color)');
-        }
-      }, 1000);
-
-      // Additional random particle effects
-      setInterval(() => {
-        const effects = ['sparkle', 'lava', 'portal', 'redstone', 'smoke'];
-        const effect = effects[Math.floor(Math.random() * effects.length)];
-        createParticles(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 10, effect === 'redstone' ? '#ff0000' : '#ffffff');
-      }, 2000);
-    });
-
-    function createParticles(x, y, count, color = 'white') {
-      for (let i = 0; i < count; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = `${x}px`;
-        particle.style.top = `${y}px`;
-        particle.style.backgroundColor = color;
-        particle.style.opacity = '1';
-        document.body.appendChild(particle);
-        
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 1 + Math.random() * 3;
-        const lifetime = 500 + Math.random() * 1000;
-        
-        const startTime = Date.now();
-        
-        function updateParticle() {
-          const elapsed = Date.now() - startTime;
-          const progress = elapsed / lifetime;
-          
-          if (progress >= 1) {
-            document.body.removeChild(particle);
-            return;
-          }
-          
-          particle.style.transform = `translate(${Math.cos(angle) * speed * elapsed / 20}px, ${Math.sin(angle) * speed * elapsed / 20 - (progress * progress * 100)}px)`;
-          particle.style.opacity = 1 - progress;
-          requestAnimationFrame(updateParticle);
-        }
-        
-        requestAnimationFrame(updateParticle);
-      }
     }
-
-    // Open crafting table and inventory
-    document.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'c') {
-        document.getElementById('crafting-table').style.display = 'block';
-        createParticles(window.innerWidth / 2, window.innerHeight / 2, 20, '#c2b280');
-      }
-      if (e.key.toLowerCase() === 'e') {
-        document.getElementById('inventory').style.display = 'block';
-        createParticles(window.innerWidth / 2, window.innerHeight / 2, 20, '#c2b280');
-      }
-    });
-  </script>
+    
+    // Format timestamp
+    function getCurrentTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+    
+    // Format AI response with gaming-themed enhancements
+    function formatAIResponse(text) {
+        // Replace markdown with HTML
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--secondary-color); text-shadow: 0 0 5px var(--secondary-color);">$1</strong>');
+        text = text.replace(/\*(.*?)\*/g, '<em style="color: var(--accent-color);">$1</em>');
+        text = text.replace(/\n(\d+\.)\s/g, '<br>$1 ');
+        text = text.replace(/\n\n/g, '</p><p>');
+        text = text.replace(/\n/g, '<br>');
+        text = `<p>${text}</p>`;
+        text = text.replace(/"([^"]+)"/g, '<span class="quote">"$1"</span>');
+        
+        // Add random achievements
+        const achievements = [
+            "Achievement Unlocked: Wise Words",
+            "Level Up: Knowledge Gained",
+            "Quest Complete: Help Received",
+            "Bonus XP: Active Listening",
+            "Skill Point: Communication +1"
+        ];
+        
+        if (Math.random() > 0.7) {
+            const randomAchievement = achievements[Math.floor(Math.random() * achievements.length)];
+            text += `<div class="achievement-badge">${randomAchievement}</div>`;
+        }
+        
+        // Add XP bar for longer responses
+        if (text.length > 200) {
+            const xpPercent = Math.min(100, Math.floor(text.length / 5));
+            text += `
+                <div class="level-indicator">
+                    <div class="level-info">
+                        <div class="level-icon">XP</div>
+                        <div class="level-text">Knowledge <span class="level-number">+${xpPercent}</span></div>
+                    </div>
+                    <div class="game-button">Claim</div>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-progress" style="--xp-percent: ${xpPercent}%"></div>
+                    <div class="xp-text">${xpPercent}%</div>
+                </div>
+            `;
+        }
+        
+        return text;
+    }
+    
+    document.getElementById('chat-form').onsubmit = async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const chatBox = document.getElementById('chat-box');
+        const userInput = formData.get('user_input');
+        
+        // Create message container
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message-container';
+        
+        // Add message meta
+        const messageMeta = document.createElement('div');
+        messageMeta.className = 'message-meta';
+        messageMeta.innerHTML = `
+            <span>PLAYER_1</span>
+            <span class="message-time">${getCurrentTime()}</span>
+        `;
+        messageContainer.appendChild(messageMeta);
+        
+        // Add user message
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.className = 'user-message';
+        userMessageDiv.textContent = userInput;
+        messageContainer.appendChild(userMessageDiv);
+        
+        chatBox.appendChild(messageContainer);
+        
+        // Add typing indicator
+        const typingContainer = document.createElement('div');
+        typingContainer.className = 'message-container';
+        
+        const typingMeta = document.createElement('div');
+        typingMeta.className = 'message-meta';
+        typingMeta.innerHTML = `
+            <span>Adamya_AI</span>
+            <span class="message-time">${getCurrentTime()}</span>
+        `;
+        typingContainer.appendChild(typingMeta);
+        
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'typing-indicator';
+        typingIndicator.innerHTML = `
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        `;
+        typingContainer.appendChild(typingIndicator);
+        
+        chatBox.appendChild(typingContainer);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        this.reset();
+        
+        try {
+            const response = await fetch('/chat', { 
+                method: 'POST', 
+                body: formData 
+            });
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+            
+            // Remove typing indicator
+            chatBox.removeChild(typingContainer);
+            
+            // Create AI response container
+            const aiContainer = document.createElement('div');
+            aiContainer.className = 'message-container';
+            
+            // Add AI message meta
+            const aiMeta = document.createElement('div');
+            aiMeta.className = 'message-meta';
+            aiMeta.innerHTML = `
+                <span>Adamya_AI</span>
+                <span class="message-time">${getCurrentTime()}</span>
+            `;
+            aiContainer.appendChild(aiMeta);
+            
+            // Add AI message
+            const aiMessageDiv = document.createElement('div');
+            aiMessageDiv.className = 'ai-message';
+            aiMessageDiv.innerHTML = formatAIResponse(data.response);
+            aiContainer.appendChild(aiMessageDiv);
+            
+            chatBox.appendChild(aiContainer);
+            
+            // Add message divider
+            const divider = document.createElement('div');
+            divider.className = 'message-divider';
+            divider.textContent = 'NEW MESSAGE';
+            chatBox.appendChild(divider);
+            
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 100);
+            
+        } catch (error) {
+            if (chatBox.contains(typingContainer)) {
+                chatBox.removeChild(typingContainer);
+            }
+            
+            const errorContainer = document.createElement('div');
+            errorContainer.className = 'message-container';
+            
+            const errorMeta = document.createElement('div');
+            errorMeta.className = 'message-meta';
+            errorMeta.innerHTML = `
+                <span>Adamya_ERROR</span>
+                <span class="message-time">${getCurrentTime()}</span>
+            `;
+            errorContainer.appendChild(errorMeta);
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'ai-message';
+            errorDiv.style.color = '#ff5555';
+            errorDiv.textContent = 'ERROR 404: Connection failed. Please try again.';
+            errorContainer.appendChild(errorDiv);
+            
+            chatBox.appendChild(errorContainer);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            console.error('Error:', error);
+        }
+    };
+    
+    // Initialize
+    window.onload = function() {
+        createParticles();
+        
+        const chatBox = document.getElementById('chat-box');
+        const welcomeContainer = document.createElement('div');
+        welcomeContainer.className = 'message-container';
+        
+        const welcomeMeta = document.createElement('div');
+        welcomeMeta.className = 'message-meta';
+        welcomeMeta.innerHTML = `
+            <span>GAME_AI</span>
+            <span class="message-time">${getCurrentTime()}</span>
+        `;
+        welcomeContainer.appendChild(welcomeMeta);
+        
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.className = 'ai-message';
+        welcomeDiv.innerHTML = `
+            <p>Welcome to <strong style="color: var(--secondary-color);">Adamya AI</strong>! 🎮</p>
+        `;
+        welcomeContainer.appendChild(welcomeDiv);
+        
+        chatBox.appendChild(welcomeContainer);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        // Input field effects
+        const inputField = document.getElementById('inputt');
+        inputField.addEventListener('focus', function() {
+            this.style.transform = 'scale(1.02)';
+            this.style.boxShadow = '0 0 30px rgba(0, 255, 136, 0.7)';
+        });
+        
+        inputField.addEventListener('blur', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '0 0 20px rgba(106, 0, 255, 0.3)';
+        });
+        
+        // Add keypress sound effect
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' && e.key.length === 1) {
+                // In a real app, you would play a sound here
+                console.log('Keypress sound effect');
+            }
+        });
+    };
+    </script>
 </body>
 </html>
